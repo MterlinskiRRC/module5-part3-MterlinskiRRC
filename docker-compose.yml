@@ -1,0 +1,54 @@
+# Module 5 - Part 3 : Multi-language microservices (Python + JavaScript) behind Nginx
+# Order: mongo -> backend -> transactions -> frontend -> nginx
+services:
+  mongo:
+    image: mongo:6
+    container_name: prf-mongo
+    restart: always
+    volumes:
+      - mongo_data:/data/db
+
+  backend:                            # Python / Flask banking API
+    build: ./backend
+    container_name: prf-backend
+    expose:
+      - "5000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/bank_app
+      - SECRET_KEY=supersecretkey
+    depends_on:
+      - mongo
+
+  transactions:                       # JavaScript / Express monthly-report service
+    build: ./transactions
+    container_name: prf-transactions
+    expose:
+      - "3000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017
+      - PORT=3000
+    depends_on:
+      - mongo
+
+  frontend:                           # static student portfolio
+    build: ./studentportfolio
+    container_name: prf-frontend
+    expose:
+      - "80"
+    depends_on:
+      - backend
+
+  nginx:                              # single entry point on http://localhost/
+    image: nginx:alpine
+    container_name: prf-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+      - transactions
+      - frontend
+
+volumes:
+  mongo_data:

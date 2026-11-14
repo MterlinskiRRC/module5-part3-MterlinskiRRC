@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+venv/
+.venv/
+# Secrets / local config
+.env
+# Node
+node_modules/
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+# Submission artifacts
+*.zip
